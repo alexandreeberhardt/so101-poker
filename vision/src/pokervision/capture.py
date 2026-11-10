@@ -1,6 +1,6 @@
 """Capture d'images depuis une webcam pour constituer le jeu de donnees.
 
-Exemple : uv run python -m pokerbot.vision.capture --camera 0 --out data/cartes
+Exemple : uv run python -m pokervision.capture --camera 0 --out data/cartes
 Espace enregistre l'image affichee, q quitte.
 """
 

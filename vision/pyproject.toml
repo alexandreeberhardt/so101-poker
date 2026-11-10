@@ -1,0 +1,12 @@
+[project]
+name = "pokervision"
+version = "0.1.0"
+description = "Vision du robot joueur de poker : cartes et jetons"
+requires-python = ">=3.10"
+dependencies = [
+    "opencv-python>=4.8",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.6,<0.14.0"]
+build-backend = "uv_build"

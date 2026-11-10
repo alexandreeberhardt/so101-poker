@@ -1,19 +1,28 @@
-# pokerbot
+# Robot SO-101 joueur de poker
 
-Robot SO-101 qui joue au Texas Hold'em No-Limit en tête-à-tête contre un humain.
+Un bras SO-101 qui joue au Texas Hold'em No-Limit en tête-à-tête contre un humain.
 
-## Etat
+Le dépôt contient deux projets Python indépendants, destinés à deux conteneurs
+qui se parlent par le réseau :
 
-- `pokerbot.engine` : règles du jeu (au-dessus de PokerKit)
-- `pokerbot.cli` : partie en ligne de commande contre un adversaire aléatoire
-- `pokerbot.strategy.kuhn` : CFR validé sur le Kuhn poker
-- `pokerbot.vision.capture` : capture d'images depuis une webcam
+- `brain/` (paquet `pokerbot`, Python 3.11+) : règles du jeu, stratégie, décision.
+- `vision/` (paquet `pokervision`, Python 3.10) : lecture des cartes et des jetons.
+  Python 3.10 est imposé par PyTorch avec GPU sur Jetson.
 
-## Utilisation
+Les images (`data/`) et les poids entraînés (`models/`) ne sont pas versionnés.
+
+## Cerveau
 
 ```
-uv run pokerbot
-uv run python -m pokerbot.strategy.kuhn
-uv run python -m pokerbot.vision.capture --camera 0 --out data/cartes
+cd brain
+uv run pokerbot                            # partie contre un bot aléatoire
+uv run python -m pokerbot.strategy.kuhn    # CFR sur le Kuhn poker
 uv run pytest
+```
+
+## Vision
+
+```
+cd vision
+uv run python -m pokervision.capture --camera 0 --out ../data/cartes
 ```

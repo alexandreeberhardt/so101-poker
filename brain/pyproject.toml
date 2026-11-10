@@ -1,14 +1,12 @@
 [project]
 name = "pokerbot"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
+description = "Moteur et strategie du robot joueur de poker"
 authors = [
     { name = "alexandre", email = "alexandre.eber07@gmail.com" }
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "opencv-python>=5.0.0.93",
     "pokerkit>=0.7.7",
 ]
 
