@@ -1,8 +1,8 @@
-"""CFR sur le Kuhn poker, pour valider l'algorithme sur un jeu a solution connue.
+"""CFR on Kuhn poker, to validate the algorithm on a game with a known solution.
 
-Trois cartes (0 = Valet, 1 = Dame, 2 = Roi), une carte par joueur, une ante de 1.
-Actions : 'p' (passer : checker ou se coucher) et 'b' (miser 1 ou suivre).
-A l'equilibre, le premier joueur perd 1/18 par main en moyenne.
+Three cards (0 = Jack, 1 = Queen, 2 = King), one card per player, an ante of 1.
+Actions: 'p' (pass: check or fold) and 'b' (bet 1 or call).
+At equilibrium, the first player loses 1/18 per hand on average.
 """
 
 from __future__ import annotations
@@ -54,7 +54,7 @@ class KuhnSolver:
                 self._cfr(cards, "", 1.0, 1.0)
 
     def _cfr(self, cards: tuple[int, int], history: str, reach0: float, reach1: float) -> float:
-        """Valeur de la position pour le premier joueur."""
+        """Value of the position for the first player."""
         if history in TERMINALS:
             return payoff_for_first_player(cards, history)
         player = player_to_act(history)
@@ -81,7 +81,7 @@ class KuhnSolver:
 
 
 def expected_value(strategy: dict[str, list[float]]) -> float:
-    """Gain moyen par main du premier joueur quand les deux suivent `strategy`."""
+    """Average winnings per hand of the first player when both follow `strategy`."""
 
     def walk(cards: tuple[int, int], history: str) -> float:
         if history in TERMINALS:
@@ -96,7 +96,7 @@ def expected_value(strategy: dict[str, list[float]]) -> float:
 
 
 def best_response_value(strategy: dict[str, list[float]], player: int) -> float:
-    """Meilleur gain possible de `player` contre `strategy`, par force brute."""
+    """Best possible winnings of `player` against `strategy`, by brute force."""
     infosets = [f"{card}{history}" for card in range(3) for history in INFOSET_HISTORIES[player]]
     best = float("-inf")
     for choices in itertools.product(range(2), repeat=len(infosets)):
@@ -109,25 +109,25 @@ def best_response_value(strategy: dict[str, list[float]], player: int) -> float:
 
 
 def exploitability(strategy: dict[str, list[float]]) -> float:
-    """Gain moyen par main d'un adversaire parfait. Vaut 0 a l'equilibre."""
+    """Average winnings per hand of a perfect opponent. Equals 0 at equilibrium."""
     return (best_response_value(strategy, 0) + best_response_value(strategy, 1)) / 2
 
 
 def main() -> None:
     solver = KuhnSolver()
-    names = "VDR"
+    names = "JQK"
     done = 0
     for target in (10, 100, 1000, 10000):
         solver.train(target - done)
         done = target
         strategy = solver.average_strategy()
-        print(f"{target} iterations : exploitabilite {exploitability(strategy):.5f}")
+        print(f"{target} iterations: exploitability {exploitability(strategy):.5f}")
     strategy = solver.average_strategy()
-    print(f"Valeur pour le premier joueur : {expected_value(strategy):+.4f} (theorie : {-1 / 18:+.4f})")
-    print("Probabilite de miser ou suivre, par situation :")
+    print(f"Value for the first player: {expected_value(strategy):+.4f} (theory: {-1 / 18:+.4f})")
+    print("Probability of betting or calling, by situation:")
     for infoset in sorted(strategy, key=lambda key: (len(key), key)):
-        situation = infoset[1:] or "debut"
-        print(f"  {names[int(infoset[0])]} apres '{situation}' : {strategy[infoset][1]:.2f}")
+        situation = infoset[1:] or "start"
+        print(f"  {names[int(infoset[0])]} after '{situation}': {strategy[infoset][1]:.2f}")
 
 
 if __name__ == "__main__":

@@ -1,1 +1,1 @@
-"""Robot SO-101 joueur de poker."""
+"""SO-101 poker-playing robot."""

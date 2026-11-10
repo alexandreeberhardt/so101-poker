@@ -1,7 +1,7 @@
 [project]
 name = "pokervision"
 version = "0.1.0"
-description = "Vision du robot joueur de poker : cartes et jetons"
+description = "Vision for the poker-playing robot: cards and chips"
 requires-python = ">=3.10"
 dependencies = [
     "opencv-python>=4.8",

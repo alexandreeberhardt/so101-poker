@@ -1,4 +1,4 @@
-"""Partie en ligne de commande contre un adversaire qui joue au hasard."""
+"""Command-line game against an opponent that plays at random."""
 
 import random
 
@@ -23,10 +23,10 @@ def ask_human(hand: Hand) -> Action:
     legal = hand.legal()
     options = []
     if legal.can_fold:
-        options.append("f = se coucher")
-    options.append("c = checker" if legal.call_amount == 0 else f"c = suivre {legal.call_amount}")
+        options.append("f = fold")
+    options.append("c = check" if legal.call_amount == 0 else f"c = call {legal.call_amount}")
     if legal.can_raise:
-        options.append(f"un nombre = relancer a ce total ({legal.min_raise_to}-{legal.max_raise_to})")
+        options.append(f"a number = raise to that total ({legal.min_raise_to}-{legal.max_raise_to})")
     while True:
         answer = input("  " + ", ".join(options) + " > ").strip().lower()
         if answer == "f":
@@ -35,39 +35,39 @@ def ask_human(hand: Hand) -> Action:
             return Action.check_call()
         if answer.isdigit():
             return Action.raise_to(int(answer))
-        print("  Entree non comprise.")
+        print("  Input not understood.")
 
 
 def show_table(hand: Hand) -> None:
     board = " ".join(hand.board) or "-"
     print(
-        f"  Board : {board} | pot {hand.pot} | "
-        f"toi {hand.stacks[HUMAN]} (mise {hand.bets[HUMAN]}) | "
-        f"bot {hand.stacks[BOT]} (mise {hand.bets[BOT]})"
+        f"  Board: {board} | pot {hand.pot} | "
+        f"you {hand.stacks[HUMAN]} (bet {hand.bets[HUMAN]}) | "
+        f"bot {hand.stacks[BOT]} (bet {hand.bets[BOT]})"
     )
 
 
 def play_hand(stacks: tuple[int, int], button: int, dealer: Dealer, rng: random.Random) -> Hand:
     hand = Hand(stacks, button)
     dealer.advance(hand)
-    print(f"\nNouvelle main. Bouton : {'toi' if button == HUMAN else 'bot'}.")
-    print(f"  Tes cartes : {' '.join(hand.hole[HUMAN])}")
+    print(f"\nNew hand. Button: {'you' if button == HUMAN else 'bot'}.")
+    print(f"  Your hole cards: {' '.join(hand.hole[HUMAN])}")
     while hand.pending is not Pending.DONE:
         show_table(hand)
         if hand.to_act == HUMAN:
             try:
                 hand.act(ask_human(hand))
             except IllegalMove as error:
-                print(f"  Refuse : {error}")
+                print(f"  Rejected: {error}")
                 continue
         else:
             action = bot_action(hand, rng)
-            print(f"  Le bot joue : {action.kind.value} {action.amount or ''}")
+            print(f"  Bot plays: {action.kind.value} {action.amount or ''}")
             hand.act(action)
         dealer.advance(hand)
     if any(event[0] == "show" for event in hand.history):
-        print(f"  Board final : {' '.join(hand.board)} | bot : {' '.join(hand.hole[BOT])}")
-    print(f"  Resultat : {hand.payoffs[HUMAN]:+d} pour toi.")
+        print(f"  Final board: {' '.join(hand.board)} | bot: {' '.join(hand.hole[BOT])}")
+    print(f"  Result: {hand.payoffs[HUMAN]:+d} for you.")
     return hand
 
 
@@ -82,4 +82,4 @@ def main() -> None:
             button = 1 - button
     except (EOFError, KeyboardInterrupt):
         print()
-    print(f"Fin. Toi : {stacks[HUMAN]}, bot : {stacks[BOT]}.")
+    print(f"Game over. You: {stacks[HUMAN]}, bot: {stacks[BOT]}.")

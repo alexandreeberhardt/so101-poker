@@ -1,1 +1,1 @@
-"""Vision du robot joueur de poker : cartes et jetons."""
+"""Vision for the poker-playing robot: cards and chips."""

@@ -1,7 +1,7 @@
-"""Capture d'images depuis une webcam pour constituer le jeu de donnees.
+"""Capture images from a webcam to build the dataset.
 
-Exemple : uv run python -m pokervision.capture --camera 0 --out data/cartes
-Espace enregistre l'image affichee, q quitte.
+Example: uv run python -m pokervision.capture --camera 0 --out data/cards
+Space saves the displayed image, q quits.
 """
 
 from __future__ import annotations
@@ -18,9 +18,9 @@ def next_index(folder: Path) -> int:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Capture d'images depuis une webcam.")
-    parser.add_argument("--camera", type=int, default=0, help="numero de la camera")
-    parser.add_argument("--out", type=Path, default=Path("data/captures"), help="dossier de sortie")
+    parser = argparse.ArgumentParser(description="Capture images from a webcam.")
+    parser.add_argument("--camera", type=int, default=0, help="camera index")
+    parser.add_argument("--out", type=Path, default=Path("data/captures"), help="output folder")
     parser.add_argument("--width", type=int, default=1920)
     parser.add_argument("--height", type=int, default=1080)
     args = parser.parse_args()
@@ -29,15 +29,15 @@ def main() -> None:
     camera.set(cv2.CAP_PROP_FRAME_WIDTH, args.width)
     camera.set(cv2.CAP_PROP_FRAME_HEIGHT, args.height)
     if not camera.isOpened():
-        raise SystemExit(f"Impossible d'ouvrir la camera {args.camera}.")
+        raise SystemExit(f"Cannot open camera {args.camera}.")
 
     args.out.mkdir(parents=True, exist_ok=True)
     index = next_index(args.out)
-    print("Espace : enregistrer. q : quitter.")
+    print("Space: save. q: quit.")
     while True:
         ok, frame = camera.read()
         if not ok:
-            raise SystemExit("La camera ne renvoie plus d'image.")
+            raise SystemExit("The camera is no longer returning images.")
         cv2.imshow("capture", frame)
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):

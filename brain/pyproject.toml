@@ -1,7 +1,7 @@
 [project]
 name = "pokerbot"
 version = "0.1.0"
-description = "Moteur et strategie du robot joueur de poker"
+description = "Engine and strategy for the poker-playing robot"
 authors = [
     { name = "alexandre", email = "alexandre.eber07@gmail.com" }
 ]
