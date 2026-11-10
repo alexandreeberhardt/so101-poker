@@ -17,6 +17,9 @@ Images (`data/`) and trained weights (`models/`) are not tracked in git.
 cd brain
 uv run pokerbot                            # game against a random bot
 uv run python -m pokerbot.strategy.kuhn    # CFR on Kuhn poker
+uv run python -m pokerbot.strategy.leduc    # CFR on Leduc poker
+uv run python -m pokerbot.strategy.leduc_rl # self-play RL on Leduc, for comparison
+uv run python -m pokerbot.strategy.pushfold 10 15  # push-or-fold charts for 10 and 15 bb
 uv run pytest
 ```
 
