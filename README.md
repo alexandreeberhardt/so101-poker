@@ -85,8 +85,11 @@ over SSH from the development machine.
 cd vision
 uv run python -m pokervision.collect --host <jetson> --out ../data/cards/pass1 --preview-port 8765
 uv run python -m pokervision.train_cards
+uv run python -m pokervision.read_cards picture.jpg            # names of the cards in a picture
+uv run python -m pokervision.read_cards --check ../data/cards  # compare with every label
 uv run python -m pokervision.collect_chips --host <jetson> --out ../data/chips \
     --chips white:1:25,red:5:25,black:25:25,blue:10:25
+uv run pytest
 ```
 
 ### Cards
@@ -98,6 +101,9 @@ uv run python -m pokervision.collect_chips --host <jetson> --out ../data/chips \
   a corner. The two corners of a card vote together.
 - `train_cards.py` trains on every labelled folder of `data/cards/` and tests on the
   folders whose name ends in `test`.
+- `read_cards.py` goes from a picture to card names in a few milliseconds, and says
+  which readings to doubt: low confidence, two corners that disagree, or the same
+  card twice.
 
 Results on 20 held-out cards per deck, with three different decks:
 
@@ -108,7 +114,10 @@ Results on 20 held-out cards per deck, with three different decks:
 | Third (design close to the first) | 19 / 20 | 20 / 20 |
 
 Showing a new deck once takes about five minutes of pictures and one minute of
-training. I took every picture in one evening with the same camera and lamp, so I
+training. Without that step the result depends on the deck: training on two decks
+and reading every card of the third gives 117 / 132, 41 / 72 and 72 / 72. The reader
+flags 41 of those 46 mistakes as doubtful, and none of the 60 held-out cards of decks
+it knows. I took every picture in one evening with the same camera and lamp, so I
 don't know yet how it copes with other lighting.
 
 ### Chips
