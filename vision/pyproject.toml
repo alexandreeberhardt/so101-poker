@@ -12,7 +12,14 @@ requires = ["uv_build>=0.13.6,<0.14.0"]
 build-backend = "uv_build"
 
 [dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
 train = [
     "torch>=2.14.1",
     "torchvision>=0.29.2",
 ]
+
+[tool.uv]
+# Training needs PyTorch. On the Jetson it comes from NVIDIA instead: sync with --no-group train.
+default-groups = ["dev", "train"]
