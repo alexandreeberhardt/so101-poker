@@ -16,8 +16,7 @@ from torch import nn
 
 from pokervision.card_model import RANKS, SUITS, CornerNet, load_corners, to_tensor
 
-TRAIN_FOLDERS = ("pass1", "pass2", "bonus")
-TEST_FOLDER = "test"
+TEST_SUFFIX = "test"
 
 
 def augment(corner: np.ndarray, rng: random.Random) -> np.ndarray:
@@ -113,15 +112,19 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
 
-    train_samples = [sample for folder in TRAIN_FOLDERS for sample in load_corners(args.data / folder)]
-    test_samples = load_corners(args.data / TEST_FOLDER)
-    print(f"{len(train_samples)} training cards, {len(test_samples)} test cards")
+    # Folders whose name ends in "test" are kept aside; every other one is used to train.
+    folders = sorted(path.parent for path in args.data.glob("*/labels.csv"))
+    test_folders = [folder for folder in folders if folder.name.endswith(TEST_SUFFIX)]
+    train_folders = [folder for folder in folders if folder not in test_folders]
+    train_samples = [sample for folder in train_folders for sample in load_corners(folder)]
+    print(f"{len(train_samples)} training cards from {', '.join(folder.name for folder in train_folders)}")
 
     model = train(train_samples, args.epochs, args.seed)
-    for name, samples in (("train", train_samples), ("test", test_samples)):
+    sets = [("train", train_samples)] + [(folder.name, load_corners(folder)) for folder in test_folders]
+    for name, samples in sets:
         result = evaluate(model, samples)
         print(
-            f"{name}: {result['card_accuracy']:.1%} of cards read correctly, "
+            f"{name}: {result['card_accuracy']:.1%} of {len(samples)} cards read correctly, "
             f"{result['corner_accuracy']:.1%} of single corners"
         )
         for expected, got in result["mistakes"]:
