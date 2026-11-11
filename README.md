@@ -28,4 +28,9 @@ uv run pytest
 ```
 cd vision
 uv run python -m pokervision.capture --camera 0 --out ../data/cards
+uv run python -m pokervision.collect_chips --host 10.50.0.4 --out ../data/chips \
+    --chips white:1:100,red:5:50,green:25:50   # colour:value:count in the case
 ```
+
+`collect_chips` shows which stacks to put on the table, scene by scene, and writes the
+content of each picture to `labels.jsonl`. It resumes where it stopped.
