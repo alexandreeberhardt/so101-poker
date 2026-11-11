@@ -65,19 +65,3 @@ def load_corners(folder: Path) -> list[tuple[np.ndarray, np.ndarray, str]]:
                 first, second = corner_crops(card)
                 samples.append((first, second, label))
     return samples
-
-
-@torch.no_grad()
-def read_card(model: CornerNet, card: np.ndarray) -> tuple[str, float]:
-    """Name of a straightened card and the confidence of the reading.
-
-    The two corners vote together: their scores are averaged.
-    """
-    model.eval()
-    rank_scores, suit_scores = model(to_tensor(corner_crops(card)))
-    rank_probabilities = rank_scores.softmax(dim=1).mean(dim=0)
-    suit_probabilities = suit_scores.softmax(dim=1).mean(dim=0)
-    rank = int(rank_probabilities.argmax())
-    suit = int(suit_probabilities.argmax())
-    confidence = float(rank_probabilities[rank] * suit_probabilities[suit])
-    return RANKS[rank] + SUITS[suit], confidence
