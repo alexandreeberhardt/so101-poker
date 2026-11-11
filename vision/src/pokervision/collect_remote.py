@@ -51,7 +51,8 @@ def _card_shapes(mask: np.ndarray) -> list[tuple]:
         if not MIN_AREA_SHARE <= rectangle_area / frame_area <= MAX_AREA_SHARE:
             continue
         if MIN_ASPECT <= aspect <= MAX_ASPECT and fill >= MIN_FILL:
-            shapes.append(rectangle)
+            tightness = cv2.contourArea(contour) / rectangle_area
+            shapes.append((rectangle, tightness))
     return shapes
 
 
@@ -73,17 +74,24 @@ def find_cards(frame: np.ndarray) -> list[tuple]:
     """
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray = cv2.resize(gray, None, fx=1 / DETECTION_SCALE, fy=1 / DETECTION_SCALE, interpolation=cv2.INTER_AREA)
-    cards: list[tuple] = []
+    # The same card is found at several thresholds. Keep the outline that hugs
+    # it best: a reflection or a shadow stuck to the card makes it looser.
+    best: list[tuple] = []
     for threshold in BRIGHTNESS_THRESHOLDS:
         _, mask = cv2.threshold(gray, threshold, 255, cv2.THRESH_BINARY)
         # Eroding separates cards that touch and cuts thin bridges to reflections.
         mask = cv2.erode(mask, EROSION_KERNEL)
-        for rectangle in _card_shapes(mask):
+        for rectangle, tightness in _card_shapes(mask):
             center = np.array(rectangle[0])
             short_side = min(rectangle[1])
-            known = any(np.linalg.norm(center - np.array(other[0])) < short_side / 2 for other in cards)
-            if not known:
-                cards.append(rectangle)
+            for index, (other, other_tightness) in enumerate(best):
+                if np.linalg.norm(center - np.array(other[0])) < short_side / 2:
+                    if tightness > other_tightness:
+                        best[index] = (rectangle, tightness)
+                    break
+            else:
+                best.append((rectangle, tightness))
+    cards = [rectangle for rectangle, _ in best]
     # Two cards lying close together also form one bright card-shaped region.
     cards = [card for card in cards if not _encloses_another(card, cards)]
     scale = DETECTION_SCALE
