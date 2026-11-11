@@ -6,17 +6,11 @@ from pokerbot.strategy.preflop import (
     class_name,
     class_of,
     combo_count,
-    compute_equities,
     representative,
 )
 from pokerbot.strategy.pushfold import range_share, solve
 
 NAMES = {class_name(index): index for index in range(CLASS_COUNT)}
-
-
-@pytest.fixture(scope="module")
-def tables():
-    return compute_equities(samples=10)
 
 
 def test_classes_cover_every_hand():
