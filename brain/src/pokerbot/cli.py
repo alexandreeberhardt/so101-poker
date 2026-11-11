@@ -1,22 +1,22 @@
-"""Command-line game against an opponent that plays at random."""
+"""Command-line game against a bot.
 
+The match is a freeze-out: it lasts until one player has all the chips. Stacks
+start short (ten big blinds by default) because the default bot plays the
+push-or-fold equilibrium, which is only sound for short stacks.
+"""
+
+from __future__ import annotations
+
+import argparse
 import random
 
-from pokerbot.engine import Action, Dealer, Hand, IllegalMove, Pending
+from pokerbot.bots import PushFoldBot, RandomBot
+from pokerbot.engine import Action, Dealer, Hand, IllegalMove, Kind, Legal, Pending
+from pokerbot.strategy.preflop import DEFAULT_CACHE
 
 HUMAN = 0
 BOT = 1
-
-
-def bot_action(hand: Hand, rng: random.Random) -> Action:
-    legal = hand.legal()
-    roll = rng.random()
-    if legal.can_raise and roll < 0.25:
-        target = min(legal.max_raise_to, legal.min_raise_to + hand.pot)
-        return Action.raise_to(target)
-    if legal.can_fold and roll > 0.85:
-        return Action.fold()
-    return Action.check_call()
+BIG_BLIND = 2
 
 
 def ask_human(hand: Hand) -> Action:
@@ -38,6 +38,15 @@ def ask_human(hand: Hand) -> Action:
         print("  Input not understood.")
 
 
+def describe(action: Action, legal: Legal) -> str:
+    if action.kind is Kind.FOLD:
+        return "folds"
+    if action.kind is Kind.CHECK_CALL:
+        return "checks" if legal.call_amount == 0 else f"calls {legal.call_amount}"
+    suffix = " (all-in)" if action.amount == legal.max_raise_to else ""
+    return f"raises to {action.amount}{suffix}"
+
+
 def show_table(hand: Hand) -> None:
     board = " ".join(hand.board) or "-"
     print(
@@ -47,8 +56,8 @@ def show_table(hand: Hand) -> None:
     )
 
 
-def play_hand(stacks: tuple[int, int], button: int, dealer: Dealer, rng: random.Random) -> Hand:
-    hand = Hand(stacks, button)
+def play_hand(stacks: tuple[int, int], button: int, dealer: Dealer, bot, rng: random.Random) -> Hand:
+    hand = Hand(stacks, button, big_blind=BIG_BLIND)
     dealer.advance(hand)
     print(f"\nNew hand. Button: {'you' if button == HUMAN else 'bot'}.")
     print(f"  Your hole cards: {' '.join(hand.hole[HUMAN])}")
@@ -61,8 +70,9 @@ def play_hand(stacks: tuple[int, int], button: int, dealer: Dealer, rng: random.
                 print(f"  Rejected: {error}")
                 continue
         else:
-            action = bot_action(hand, rng)
-            print(f"  Bot plays: {action.kind.value} {action.amount or ''}")
+            legal = hand.legal()
+            action = bot.act(hand, BOT, rng)
+            print(f"  Bot {describe(action, legal)}.")
             hand.act(action)
         dealer.advance(hand)
     if any(event[0] == "show" for event in hand.history):
@@ -71,14 +81,29 @@ def play_hand(stacks: tuple[int, int], button: int, dealer: Dealer, rng: random.
     return hand
 
 
+def make_bot(name: str):
+    if name == "random":
+        return RandomBot()
+    if not DEFAULT_CACHE.exists():
+        print("Computing the preflop equities, about a minute. This only happens once.")
+    return PushFoldBot()
+
+
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Heads-up No-Limit Hold'em against a bot.")
+    parser.add_argument("--bot", choices=("pushfold", "random"), default="pushfold")
+    parser.add_argument("--stack", type=int, default=10, help="starting stack of each player, in big blinds")
+    args = parser.parse_args()
+
     rng = random.Random()
     dealer = Dealer(rng)
-    stacks = (200, 200)
+    bot = make_bot(args.bot)
+    stacks = (args.stack * BIG_BLIND, args.stack * BIG_BLIND)
     button = HUMAN
+    print(f"Blinds 1 and {BIG_BLIND}. Each player starts with {stacks[HUMAN]} chips.")
     try:
         while min(stacks) > 0:
-            stacks = play_hand(stacks, button, dealer, rng).stacks
+            stacks = play_hand(stacks, button, dealer, bot, rng).stacks
             button = 1 - button
     except (EOFError, KeyboardInterrupt):
         print()

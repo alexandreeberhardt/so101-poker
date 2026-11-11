@@ -14,7 +14,7 @@ These parts only need a computer, a camera, cards and chips.
 |---|---|
 | Poker engine | Works: full heads-up hands, playable in the terminal |
 | Equilibrium solver (CFR) | Works on Kuhn and Leduc poker, checked against their known values |
-| Short-stack strategy | Works: exact push-or-fold equilibrium, not yet plugged into the game |
+| Short-stack strategy | Works: exact push-or-fold equilibrium, playable in the terminal |
 | Deep-stack strategy | Not started |
 | Adapting to the opponent | Not started |
 | Reading cards | Works on three decks, through a camera under a glass plate |
@@ -46,7 +46,8 @@ Pictures (`data/`) and trained weights (`models/`) are not tracked in git.
 
 ```
 cd brain
-uv run pokerbot                                     # play against a random bot
+uv run pokerbot                                     # play the push-or-fold bot, 10 bb each
+uv run pokerbot --bot random --stack 100            # play a random bot, 100 bb each
 uv run python -m pokerbot.strategy.kuhn             # CFR on Kuhn poker
 uv run python -m pokerbot.strategy.leduc            # CFR on Leduc poker
 uv run python -m pokerbot.strategy.leduc_rl         # self-play RL on Leduc, for comparison
@@ -57,6 +58,10 @@ uv run pytest
 - `engine.py`: heads-up No-Limit Hold'em on top of PokerKit. A hand advances step by
   step (hole cards, action, board, showdown), with cards coming either from a random
   deal or from the camera. The opponent's hand can stay unknown until showdown.
+- `bots.py`: the opponents of the terminal game. The push-or-fold bot plays the
+  equilibrium for the current stack depth. When I step outside of that small game
+  (a limp, a small raise, a flop), it falls back on simple rules that are not an
+  equilibrium.
 - `strategy/kuhn.py`, `strategy/leduc.py`: CFR with exact exploitability. Both reach
   the known value of their game.
 - `strategy/leduc_rl.py`: a self-play policy-gradient agent, kept as a comparison.
@@ -65,6 +70,7 @@ uv run pytest
   (about 3 million hands per second), checked against PokerKit.
 - `strategy/preflop.py`, `strategy/pushfold.py`: the 169 preflop classes, their
   all-in equities, and the exact push-or-fold equilibrium for short stacks.
+- `strategy/equity.py`: chance of winning against a random hand, by sampling.
 
 Deeper stacks and adapting to the opponent are still to do. The match format is a
 freeze-out: play until one player has all the chips.
