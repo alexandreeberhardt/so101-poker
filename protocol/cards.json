@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "zone": "robot_hole",
+  "cards": [
+    {"name": "Jd", "confidence": 0.98, "doubt": ""},
+    {"name": "4c", "confidence": 0.95, "doubt": ""}
+  ]
+}
