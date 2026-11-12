@@ -21,7 +21,7 @@ These parts only need a computer, a camera, cards and chips.
 | Learning a new deck | Works: one picture of each card, then a minute of training |
 | Collecting chip pictures | Works: guided capture with exact labels |
 | Counting chips | Not working yet: about 1.5 chips of error per colour |
-| Link between vision and brain | Not started |
+| Link between vision and brain | Works for cards, tested on pictures. Not tried with the live camera yet |
 
 ### With the arm
 
@@ -39,6 +39,9 @@ over the network, so that they can run on different machines:
 - `brain/` (package `pokerbot`, Python 3.11+): game rules, strategy, decisions.
 - `vision/` (package `pokervision`, Python 3.10): reading the cards and the chips.
   Python 3.10 is imposed by PyTorch with GPU support on the Jetson Orin Nano.
+
+The vision answers over HTTP with the cards it sees, and the brain asks for them.
+`protocol/cards.json` is an example of the message; the tests of both projects read it.
 
 Pictures (`data/`) and trained weights (`models/`) are not tracked in git.
 
@@ -62,6 +65,8 @@ uv run pytest
   equilibrium for the current stack depth. When I step outside of that small game
   (a limp, a small raise, a flop), it falls back on simple rules that are not an
   equilibrium.
+- `vision_client.py`: asks the vision for the cards it sees. A reading is used only
+  when the vision trusts every card and has given it three times in a row.
 - `strategy/kuhn.py`, `strategy/leduc.py`: CFR with exact exploitability. Both reach
   the known value of their game.
 - `strategy/leduc_rl.py`: a self-play policy-gradient agent, kept as a comparison.
@@ -87,6 +92,7 @@ uv run python -m pokervision.collect --host <jetson> --out ../data/cards/pass1 -
 uv run python -m pokervision.train_cards
 uv run python -m pokervision.read_cards picture.jpg            # names of the cards in a picture
 uv run python -m pokervision.read_cards --check ../data/cards  # compare with every label
+uv run python -m pokervision.serve --picture picture.jpg       # answer the brain on port 8770
 uv run python -m pokervision.collect_chips --host <jetson> --out ../data/chips \
     --chips white:1:25,red:5:25,black:25:25,blue:10:25
 uv run pytest
@@ -104,6 +110,8 @@ uv run pytest
 - `read_cards.py` goes from a picture to card names in a few milliseconds, and says
   which readings to doubt: low confidence, two corners that disagree, or the same
   card twice.
+- `serve.py` gives those readings to the brain over HTTP, from a camera or from a
+  picture file.
 
 Results on 20 held-out cards per deck, with three different decks:
 
