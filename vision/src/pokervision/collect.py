@@ -53,7 +53,8 @@ def main() -> None:
     if not labels.exists():
         labels.write_text("file,left,right\n")
 
-    command = ["ssh", "-o", "BatchMode=yes", args.host, "python3", "-u", "-", str(args.count), args.device, str(args.preview_port)]
+    remote_arguments = [str(args.count), args.device, str(args.preview_port)]
+    command = ["ssh", "-o", "BatchMode=yes", args.host, "python3", "-u", "-", *remote_arguments]
     with REMOTE_SCRIPT.open("rb") as script:
         process = subprocess.Popen(command, stdin=script, stdout=subprocess.PIPE)
     received = 0

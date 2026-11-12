@@ -1,9 +1,16 @@
 import cv2
-import numpy as np
 import pytest
 from conftest import draw_card
 
-from pokervision.cards import CARD_HEIGHT, CARD_WIDTH, CORNER_HEIGHT, CORNER_WIDTH, corner_crops, extract_cards, straighten
+from pokervision.cards import (
+    CARD_HEIGHT,
+    CARD_WIDTH,
+    CORNER_HEIGHT,
+    CORNER_WIDTH,
+    corner_crops,
+    extract_cards,
+    straighten,
+)
 from pokervision.collect_remote import find_cards
 
 
@@ -69,6 +76,9 @@ def test_cards_come_out_from_left_to_right(table):
     draw_card(table, (500, 600))
     cv2.circle(table, (500, 600), 60, (0, 0, 255), -1)
     first, second = extract_cards(table)
-    red_share = lambda card: float(((card[..., 2] > 200) & (card[..., 1] < 80)).mean())
+
+    def red_share(card):
+        return float(((card[..., 2] > 200) & (card[..., 1] < 80)).mean())
+
     assert red_share(first) > 0.05
     assert red_share(second) == 0

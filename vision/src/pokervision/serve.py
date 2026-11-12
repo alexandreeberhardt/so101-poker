@@ -16,9 +16,9 @@ from __future__ import annotations
 import argparse
 import json
 import threading
+from collections.abc import Callable
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Callable
 
 import cv2
 import numpy as np

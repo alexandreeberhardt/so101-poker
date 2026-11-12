@@ -5,10 +5,8 @@ import urllib.request
 from pathlib import Path
 
 import pytest
-import torch
 from conftest import draw_card
 
-from pokervision.card_model import CornerNet
 from pokervision.read_cards import CardReader, CardReading
 from pokervision.serve import cards_message, make_server
 
@@ -16,11 +14,8 @@ EXAMPLE = Path(__file__).parents[2] / "protocol" / "cards.json"
 
 
 @pytest.fixture
-def reader(tmp_path):
-    torch.manual_seed(0)
-    path = tmp_path / "cards.pt"
-    torch.save(CornerNet().state_dict(), path)
-    return CardReader(path)
+def reader(untrained_weights):
+    return CardReader(untrained_weights)
 
 
 def serve(source, reader):

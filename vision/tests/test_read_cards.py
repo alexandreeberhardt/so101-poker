@@ -2,21 +2,12 @@ from pathlib import Path
 
 import cv2
 import pytest
-import torch
 from conftest import draw_card
 
-from pokervision.card_model import RANKS, SUITS, CornerNet
+from pokervision.card_model import RANKS, SUITS
 from pokervision.read_cards import DEFAULT_WEIGHTS, MIN_CONFIDENCE, CardReader
 
 REAL_DATA = Path("../data/cards")
-
-
-@pytest.fixture
-def untrained_weights(tmp_path):
-    torch.manual_seed(0)
-    path = tmp_path / "cards.pt"
-    torch.save(CornerNet().state_dict(), path)
-    return path
 
 
 def test_no_card_gives_no_reading(table, untrained_weights):
@@ -57,7 +48,12 @@ def test_the_same_card_twice_is_doubtful(table, untrained_weights):
     assert [reading.doubt for reading in readings] == ["same card twice", "same card twice"]
 
 
-@pytest.mark.skipif(not (DEFAULT_WEIGHTS.exists() and REAL_DATA.exists()), reason="needs the pictures and the trained weights")
+needs_real_data = pytest.mark.skipif(
+    not (DEFAULT_WEIGHTS.exists() and REAL_DATA.exists()), reason="needs the pictures and the trained weights"
+)
+
+
+@needs_real_data
 def test_held_out_pictures_are_read_without_mistake():
     reader = CardReader()
     for folder in sorted(REAL_DATA.glob("*test")):

@@ -11,8 +11,8 @@ import json
 import time
 import urllib.error
 import urllib.request
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 from pokerbot.engine import FULL_DECK
 

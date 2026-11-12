@@ -6,7 +6,14 @@ from pathlib import Path
 import pytest
 
 from pokerbot.engine import Hand, Pending
-from pokerbot.vision_client import SeenCard, VisionError, fetch_cards, parse_cards_message, trusted_cards, wait_for_cards
+from pokerbot.vision_client import (
+    SeenCard,
+    VisionError,
+    fetch_cards,
+    parse_cards_message,
+    trusted_cards,
+    wait_for_cards,
+)
 
 EXAMPLE = json.loads((Path(__file__).parents[2] / "protocol" / "cards.json").read_text())
 JACK = SeenCard("Jd", 0.98, "")

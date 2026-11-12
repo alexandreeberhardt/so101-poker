@@ -23,3 +23,10 @@ train = [
 [tool.uv]
 # Training needs PyTorch. On the Jetson it comes from NVIDIA instead: sync with --no-group train.
 default-groups = ["dev", "train"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+extend-select = ["I", "B"]
+ignore = ["B905"]
