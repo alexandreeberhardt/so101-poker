@@ -7,7 +7,7 @@ The camera side takes a picture each time two new cards are in place, so the
 position in the sequence gives the labels. Labels use image coordinates. Each
 picture is announced aloud on macOS.
 
-Example: uv run python -m pokervision.collect --host 10.50.0.4 --out ../data/cards/pass1
+Example: uv run python -m pokervision.collect --host <jetson> --out ../data/cards/pass1
 """
 
 from __future__ import annotations

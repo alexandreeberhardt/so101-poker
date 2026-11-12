@@ -6,7 +6,7 @@ the exact content of the scene in labels.jsonl. The counts can therefore be trus
 later, when the chips are gone. The camera is on a remote host reached over SSH.
 
 Example:
-    uv run python -m pokervision.collect_chips --host 10.50.0.4 --out ../data/chips \
+    uv run python -m pokervision.collect_chips --host <jetson> --out ../data/chips \
         --chips white:1:100,red:5:50,green:25:50,blue:50:50,black:100:50
 
 --chips is colour:value:how many chips of that colour are in the case. It is only needed
